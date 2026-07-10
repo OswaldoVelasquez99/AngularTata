@@ -1,0 +1,145 @@
+<app-header></app-header>
+
+<main class="page">
+  <div class="toolbar">
+    <!-- Búsqueda de productos financieros -->
+    <div class="search-bar">
+      <input
+        type="text"
+        class="search-bar__input"
+        placeholder="Search.."
+        [ngModel]="terminoBusqueda()"
+        (ngModelChange)="onBuscar($event)"
+      />
+    </div>
+
+    <button type="button" class="btn-agregar" routerLink="/products/new">
+      Agregar
+    </button>
+  </div>
+
+  <section class="card">
+    <!-- Estados de carga / error -->
+    <div class="state-message" *ngIf="cargando()">Cargando productos...</div>
+    <div class="state-message state-message--error" *ngIf="error()">{{ error() }}</div>
+
+    <ng-container *ngIf="!cargando() && !error()">
+      <div class="table-scroll">
+        <table class="products-table">
+          <thead>
+          <tr>
+            <th class="col-logo">Logo</th>
+            <th class="col-nombre">Nombre del producto</th>
+            <th class="col-descripcion">
+              Descripción
+              <span class="info-icon" title="Detalle breve del producto financiero">i</span>
+            </th>
+            <th class="col-fecha">
+              Fecha de liberación
+              <span class="info-icon" title="Fecha en que el producto sale al mercado">i</span>
+            </th>
+            <th class="col-fecha">
+              Fecha de reestructuración
+              <span class="info-icon" title="Fecha de la próxima revisión del producto">i</span>
+            </th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let producto of productosVisibles()">
+            <td class="col-logo">
+              <div class="avatar" *ngIf="!producto.logo">
+                {{ obtenerIniciales(producto.name) }}
+              </div>
+              <img class="avatar avatar--img" *ngIf="producto.logo" [src]="producto.logo" [alt]="producto.name" />
+            </td>
+            <td class="col-nombre">{{ producto.name }}</td>
+            <td class="col-descripcion">{{ producto.description }}</td>
+            <td class="col-fecha">{{ producto.date_release | date: 'dd/MM/yyyy' }}</td>
+            <td class="col-fecha">{{ producto.date_revision | date: 'dd/MM/yyyy' }}</td>
+            <td class="col-menu">
+              <div class="menu-wrapper">
+                <button
+                  type="button"
+                  class="menu-btn"
+                  (click)="toggleMenu(producto.id, $event)"
+                  aria-label="Más opciones"
+                >
+                  <svg viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="2" cy="2" r="1.7" fill="currentColor" />
+                    <circle cx="2" cy="8" r="1.7" fill="currentColor" />
+                    <circle cx="2" cy="14" r="1.7" fill="currentColor" />
+                  </svg>
+                </button>
+
+                <ul class="menu-dropdown" *ngIf="menuAbiertoId() === producto.id">
+                  <li (click)="editarProducto(producto, $event)">Editar</li>
+                  <li class="menu-dropdown__danger" (click)="solicitarEliminar(producto, $event)">
+                    Eliminar
+                  </li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="productosVisibles().length === 0">
+            <td class="empty-row" colspan="6">No se encontraron productos.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Cantidad de registros -->
+      <footer class="table-footer">
+        <span class="table-footer__count">
+          {{ productosFiltrados().length }} Resultados
+        </span>
+
+        <div class="page-size" (click)="toggleDropdown()">
+          <span>{{ pageSize() }}</span>
+          <svg class="page-size__arrow" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+
+          <ul class="page-size__menu" *ngIf="dropdownOpen()">
+            <li
+              *ngFor="let opcion of opcionesPageSize"
+              [class.active]="opcion === pageSize()"
+              (click)="seleccionarPageSize(opcion); $event.stopPropagation()"
+            >
+              {{ opcion }}
+            </li>
+          </ul>
+        </div>
+      </footer>
+    </ng-container>
+  </section>
+
+  <div class="modal-overlay" *ngIf="productoAEliminar() as producto">
+    <div class="modal-card">
+      <p class="modal-card__text">
+        ¿Estás seguro de eliminar el producto {{ producto.name }}?
+      </p>
+
+      <p class="modal-card__error" *ngIf="errorEliminar()">{{ errorEliminar() }}</p>
+
+      <div class="modal-card__actions">
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="cancelarEliminar()"
+          [disabled]="eliminando()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="confirmarEliminar()"
+          [disabled]="eliminando()"
+        >
+          {{ eliminando() ? 'Eliminando...' : 'Eliminar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</main>

@@ -1,0 +1,123 @@
+<app-header></app-header>
+
+<main class="page">
+  <section class="form-card">
+    <h2 class="form-card__title">{{ modoEdicion() ? 'Formulario de Edición' : 'Formulario de Registro' }}</h2>
+
+    <p class="state-message" *ngIf="cargandoProducto()">Cargando producto...</p>
+
+    <form
+      class="product-form"
+      [formGroup]="form"
+      (ngSubmit)="enviar()"
+      novalidate
+      *ngIf="!cargandoProducto()"
+    >
+      <div class="form-grid">
+        <div class="field">
+          <label for="id">ID</label>
+          <input
+            id="id"
+            type="text"
+            formControlName="id"
+            class="field__input"
+            [class.field__input--error]="campoInvalido('id')"
+            [class.field__input--disabled]="modoEdicion()"
+          />
+          <span class="field__error" *ngIf="campoInvalido('id')">
+            {{ mensajeError('id') }}
+          </span>
+          <span class="field__hint" *ngIf="form.get('id')?.pending">
+            Verificando disponibilidad del Id...
+          </span>
+        </div>
+
+        <!-- Nombre -->
+        <div class="field">
+          <label for="name">Nombre</label>
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+            class="field__input"
+            [class.field__input--error]="campoInvalido('name')"
+          />
+          <span class="field__error" *ngIf="campoInvalido('name')">
+            {{ mensajeError('name') }}
+          </span>
+        </div>
+
+        <!-- Descripción -->
+        <div class="field">
+          <label for="description">Descripción</label>
+          <input
+            id="description"
+            type="text"
+            formControlName="description"
+            class="field__input"
+            [class.field__input--error]="campoInvalido('description')"
+          />
+          <span class="field__error" *ngIf="campoInvalido('description')">
+            {{ mensajeError('description') }}
+          </span>
+        </div>
+
+        <!-- Logo -->
+        <div class="field">
+          <label for="logo">Logo</label>
+          <input
+            id="logo"
+            type="text"
+            formControlName="logo"
+            class="field__input"
+            [class.field__input--error]="campoInvalido('logo')"
+          />
+          <span class="field__error" *ngIf="campoInvalido('logo')">
+            {{ mensajeError('logo') }}
+          </span>
+        </div>
+
+        <!-- Fecha Liberación -->
+        <div class="field">
+          <label for="date_release">Fecha Liberación</label>
+          <input
+            id="date_release"
+            type="date"
+            formControlName="date_release"
+            class="field__input"
+            [class.field__input--error]="campoInvalido('date_release')"
+          />
+          <span class="field__error" *ngIf="campoInvalido('date_release')">
+            {{ mensajeError('date_release') }}
+          </span>
+        </div>
+
+        <!-- Fecha Revisión (calculada, deshabilitada) -->
+        <div class="field">
+          <label for="date_revision">Fecha Revisión</label>
+          <input
+            id="date_revision"
+            type="date"
+            formControlName="date_revision"
+            class="field__input field__input--disabled"
+          />
+        </div>
+      </div>
+
+      <p class="form-error" *ngIf="errorEnvio">{{ errorEnvio }}</p>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn--secondary" (click)="reiniciar()">
+          Reiniciar
+        </button>
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="form.invalid || form.pending || enviando"
+        >
+          {{ enviando ? 'Guardando...' : (modoEdicion() ? 'Editar' : 'Agregar') }}
+        </button>
+      </div>
+    </form>
+  </section>
+</main>
